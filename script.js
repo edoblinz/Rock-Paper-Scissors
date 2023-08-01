@@ -1,7 +1,10 @@
 let playerScore = 0;
 let computerScore = 0;
-let totalRound = 0;
-let gameOn = true;
+let roundWinner = "";
+
+const rockBtn = document.querySelector("#rockBtn");
+const paperBtn = document.querySelector("#paperBtn");
+const scissorsBtn = document.querySelector("#scissorsBtn");
 
 function getComputerChoice() {
   let choiceList = ["rock", "paper", "scissors"];
@@ -9,52 +12,113 @@ function getComputerChoice() {
   return choiceList[choiceIndex];
 }
 
-let message = {
-  tie: "Its a tie",
-  win: ` YOU WIN. computer chose ${computerSelection} `,
-  lose: `YOU LOSE. computer chose ${computerSelection}`,
-  congrats: "Congratulations YOU WIN",
-  lost: "Sorry you lost",
-};
 function playground(playerSelection, computerSelection) {
-  if (playerSelection == computerSelection) {
-    return message["tie"];
-  } else if (playerSelection == "rock" && computerSelection == "scissors") {
-    ++playerScore;
-    return message["win"];
-  } else if (playerSelection == "paper" && computerSelection == "rock") {
-    ++playerScore;
-    return message["win"];
-  } else if (playerSelection == "scissors" && computerSelection == "paper") {
-    ++playerScore;
-    return message["win"];
-  } else if (computerSelection == "rock" && playerSelection == "scissors") {
-    ++computerScore;
-    return message["lose"];
-  } else if (computerSelection == "paper" && playerSelection == "rock") {
-    ++computerScore;
-    return message["lose"];
-  } else if (computerSelection == "scissors" && playerSelection == "paper") {
-    ++computerScore;
-    return message["lose"];
+  if (
+    (playerSelection == "rock" && computerSelection == "scissors") ||
+    (playerSelection == "paper" && computerSelection == "rock") ||
+    (playerSelection == "scissors" && computerSelection == "paper")
+  ) {
+    roundWinner = "player";
+    playerScore++;
+  } else if (
+    (computerSelection == "rock" && playerSelection == "scissors") ||
+    (computerSelection == "paper" && playerSelection == "rock") ||
+    (computerSelection == "scissors" && playerSelection == "paper")
+  ) {
+    roundWinner = "computer";
+    computerScore++;
+  } else {
+    roundWinner = "tie";
   }
 }
-
-function game() {
-  while (gameOn) {
-    let playerSelection = prompt("Rock, Paper, or Scissors: ").toLowerCase();
-    let computerSelection = getComputerChoice();
-    console.log(playground(playerSelection, computerSelection));
-    console.log(`YOU: ${playerScore}, COMPUTER: ${computerScore}`);
-    if (playerScore == 3 || computerScore == 3) {
-      if (playerScore > computerScore) {
-        return message["congrats"];
-      } else {
-        message.lost;
-      }
-      gameOn = false;
-    }
+const handleClick = (playerChoice) => {
+ 
+  let computerChoice = getComputerChoice();
+  playground(playerChoice, computerChoice);
+  displayResults(playerChoice, computerChoice);
+  if (playerScore == 5 || computerScore == 5) {
+    endGame()
+    return;
   }
+};
+
+rockBtn.addEventListener("click", () => handleClick("rock"));
+paperBtn.addEventListener("click", () => handleClick("paper"));
+scissorsBtn.addEventListener("click", () => handleClick("scissors"));
+
+
+// DISPLAY UI
+let playerSign = document.querySelector("#playerSign");
+let playerScoreBoard = document.querySelector("#playerScore");
+let computerSign = document.querySelector("#computerSign");
+let computerScoreBoard = document.querySelector("#computerScore");
+let scoreInfo = document.querySelector("#scoreInfo");
+let scoreMessage = document.querySelector("#scoreMessage");
+let modal = document.querySelector("#endgameModal")
+let overlay = document.querySelector("#overlay")
+let endgameMsg = document.querySelector("#endgameMsg")
+let restartBtn = document.querySelector("#restartBtn")
+
+const displayResults = (player, computer) => {
+  switch (player) {
+    case "rock":
+      playerSign.textContent = "✊";
+      break;
+    case "paper":
+      playerSign.textContent = "✋";
+      break;
+    case "scissors":
+      playerSign.textContent = "✌";
+      break;
+  }
+  switch (computer) {
+    case "rock":
+      computerSign.textContent = "✊";
+      break;
+    case "paper":
+      computerSign.textContent = "✋";
+      break;
+    case "scissors":
+      computerSign.textContent = "✌";
+      break;
+  }
+
+  switch (roundWinner) {
+    case "player":
+      scoreInfo.textContent = "You win!";
+      scoreMessage.textContent = `${computer} is beaten by ${player}`;
+      break;
+    case "computer":
+      scoreInfo.textContent = "You lost!";
+      scoreMessage.textContent = `${player} is beaten by ${computer}`;
+      break;
+    case "tie":
+      scoreInfo.textContent = "It's a tie";
+      scoreMessage.textContent = `${computer} ties with ${player}`;
+      break;
+  }
+  playerScoreBoard.textContent = `Player: ${playerScore}`;
+  computerScoreBoard.textContent = `Computer: ${computerScore}`;
+};
+
+function endGame() {
+  modal.classList.add("active")
+  overlay.classList.add("active")
+  let finalMessage = playerScore > computerScore ? "You won!.." : "You lost!..."
+  endgameMsg.textContent = finalMessage;
 }
 
-game();
+function restartGame() {
+  playerScore = 0;
+  computerScore = 0;
+  roundWinner = "";
+  scoreInfo.textContent = "Choose your weapon"
+  scoreMessage.textContent = "First to score 5 points wins the game"
+  playerSign.textContent = "❔"
+  computerSign.textContent = "❔"
+  playerScoreBoard.textContent = "Player: 0"
+  computerScoreBoard.textContent = "computer: 0"
+  modal.classList.remove("active")
+  overlay.classList.remove("active")
+};
+restartBtn.addEventListener("click", restartGame);
